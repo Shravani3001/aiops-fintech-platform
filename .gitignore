@@ -10,3 +10,4 @@ __pycache__/
 grafana-data/
 mongo-data/
 prometheus-data/
+mlruns/
