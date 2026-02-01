@@ -1,0 +1,6 @@
+outs:
+- md5: df7b2f5e5ed775f042b02d946adbe381
+  size: 4012
+  isexec: true
+  hash: md5
+  path: borrowers_raw.csv
