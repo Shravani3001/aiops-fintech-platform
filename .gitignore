@@ -1,0 +1,12 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Docker volumes 
+grafana-data/
+mongo-data/
+prometheus-data/
