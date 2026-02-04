@@ -1,0 +1,12 @@
+groups:
+- name: availability-alerts
+  rules:
+  - alert: ServiceDown
+    expr: up{job="credit-risk-api"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      category: availability
+    annotations:
+      summary: "Credit Risk API is down"
+      current_value: "{{ $value }}"

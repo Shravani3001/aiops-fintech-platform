@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+scikit-learn
+joblib
+pandas
+prometheus-client
+pymongo
+openai
+python-dotenv
+docker
+mlflow

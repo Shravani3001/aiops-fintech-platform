@@ -1,0 +1,12 @@
+groups:
+- name: restart-alerts
+  rules:
+  - alert: ContainerRestartLoop
+    expr: changes(up{job="credit-risk-api"}[5m]) >= 3
+    for: 2m
+    labels:
+      severity: critical
+      category: restarts
+    annotations:
+      summary: "Container restarting frequently"
+      current_value: "{{ $value }}"

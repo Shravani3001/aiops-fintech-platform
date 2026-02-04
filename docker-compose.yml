@@ -1,0 +1,122 @@
+services:
+  api: 
+    build: 
+      context: ./api 
+      dockerfile: Dockerfile 
+    container_name: credit-risk-api 
+    ports: 
+      - "8000:8000" 
+    depends_on: 
+      - mongodb
+      - mlflow
+    extra_hosts:
+      - "localhost:host-gateway"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - mlruns:/mlruns
+      - ./api:/app
+    restart: unless-stopped
+    
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MONGO_URI=${MONGO_URI}
+      - PROM_URL=${PROM_URL}
+      - LATENCY_THRESHOLD=${LATENCY_THRESHOLD}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - MLFLOW_TRACKING_URI=http://localhost:5000
+      - MLFLOW_REGISTRY_URI=http://localhost:5000
+      - MLFLOW_ENABLE_PROXY_FIX=true
+      - MLFLOW_HOST=0.0.0.0
+    networks:
+      - aiops-fintech-network
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus-data:/prometheus
+      - ./monitoring/rules:/etc/prometheus/rules
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+    networks:
+      - aiops-fintech-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+    networks:
+      - aiops-fintech-network
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+    ports:
+      - "9093:9093"
+    networks:
+      - aiops-fintech-network
+    restart: unless-stopped
+
+  borrower-seeder:
+    build:
+      context: ./api
+    container_name: borrower-seeder
+    volumes:
+      - ./api/ml/data/processed:/app/api/ml/data/processed
+    command: python seed_borrowers.py
+    depends_on:
+      - mongodb
+    networks:
+      - aiops-fintech-network
+
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - aiops-fintech-network
+    restart: unless-stopped
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.9.0
+    container_name: mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlruns:/mlruns
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow.db
+      --default-artifact-root /mlruns
+      --host 0.0.0.0
+      --port 5000
+    networks:
+      - aiops-fintech-network
+
+
+volumes:
+  grafana-data:
+  mongo-data:
+  mlruns:
+
+networks:
+  aiops-fintech-network:
+    driver: bridge

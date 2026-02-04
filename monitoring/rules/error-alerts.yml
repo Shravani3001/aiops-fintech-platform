@@ -1,0 +1,22 @@
+groups:
+- name: error-alerts
+  rules:
+  - alert: High5xxErrorRate
+    expr: |
+      (
+        sum(rate(http_requests_total{status=~"5..", endpoint!="/metrics"}[2m]))
+      )
+      /
+      clamp_min(
+        sum(rate(http_requests_total{endpoint!="/metrics"}[2m])),
+        1
+      ) > 0.05
+      and
+      sum(rate(http_requests_total{endpoint!="/metrics"}[2m])) > 1
+    for: 2m
+    labels:
+      severity: critical
+      category: errors
+    annotations:
+      summary: "High 5xx error rate"
+      current_value: "{{ $value }}"

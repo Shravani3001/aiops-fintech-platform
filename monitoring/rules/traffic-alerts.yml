@@ -1,0 +1,15 @@
+groups:
+- name: traffic-alerts
+  rules:
+  - alert: TrafficSpike
+    expr: |
+      rate(http_requests_total[2m])
+      >
+      2 * rate(http_requests_total[10m])
+    for: 2m
+    labels:
+      severity: warning
+      category: traffic
+    annotations:
+      summary: "Traffic spike detected"
+      current_value: "{{ $value }}"
