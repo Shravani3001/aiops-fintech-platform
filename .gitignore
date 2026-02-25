@@ -5,9 +5,13 @@ __pycache__/
 
 # Environment variables
 .env
+.env.*
 
 # Docker volumes 
 grafana-data/
 mongo-data/
 prometheus-data/
 mlruns/
+
+# DVC cache 
+.dvc/cache/

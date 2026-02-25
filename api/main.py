@@ -4,11 +4,12 @@ import pandas as pd
 import time
 import asyncio
 import os
-import mlflow
+import joblib
 import docker
 import json
 import logging
 import requests
+import boto3
 from openai import OpenAI
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response
@@ -23,7 +24,6 @@ from pydantic import BaseModel
 
 client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 SAFE_FIXES = {
-    "restart api container",
     "restart service",
     "clear cache"
 }
@@ -45,11 +45,7 @@ unknown_events_col = db["unknown_events"]
 
 MODEL_NAME = os.getenv("MODEL_NAME", "credit_risk_model")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "production")
-
-mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000"))
-mlflow.set_registry_uri("http://localhost:5000")
-
-MODEL_URI = "models:/credit_risk_model@production"
+MODEL_PATH = "/app/credit_risk_model.joblib"
 model = None
 
 class BorrowerIdRequest(BaseModel):
@@ -81,24 +77,17 @@ async def lifespan(app: FastAPI):
     print("🔥 LIFESPAN STARTED")
 
     # MongoDB
-    for _ in range(30):
-        try:
-            client.admin.command("ping")
-            print("✅ MongoDB connected")
-            break
-        except ServerSelectionTimeoutError:
-            await asyncio.sleep(2)
-
-    # MLflow
     try:
-        mlflow.set_tracking_uri("http://localhost:5000")
-        mlflow.set_registry_uri("http://localhost:5000")
+      client.admin.command("ping")
+      print("✅ MongoDB connected")
+    except Exception:
+      print("⚠️ MongoDB not available — continuing without blocking")
 
-        print("🚀 Loading model:", MODEL_URI)
-        model_uri = "models:/credit_risk_model@production"
-        model = mlflow.pyfunc.load_model(model_uri)
+    # Load model (NO MLflow here)
+    try:
+        print("🚀 Loading model from file:", MODEL_PATH)
+        model = joblib.load(MODEL_PATH)
         print("✅ MODEL LOADED:", type(model))
-
     except Exception:
         import traceback
         print("❌ MODEL LOAD FAILED")
@@ -106,7 +95,6 @@ async def lifespan(app: FastAPI):
         model = None
 
     yield
-
 # ✅ Create app ONLY ONCE
 app = FastAPI(lifespan=lifespan)
 
@@ -183,16 +171,26 @@ Respond ONLY in valid JSON with these keys:
     }
 
 def apply_fix(fix: str):
-    if fix == "restart api container":
+    if fix == "restart service":
         try:
-            docker_client = docker.from_env()
-            container = docker_client.containers.get("credit-risk-api")
-            container.restart()
-            print("✅ Self-heal: API container restarted")
+            cluster = os.getenv("ECS_CLUSTER_NAME")
+            service = os.getenv("ECS_SERVICE_NAME")
+
+            ecs = boto3.client("ecs", region_name=os.getenv("AWS_REGION"))
+
+            ecs.update_service(
+                cluster=cluster,
+                service=service,
+                forceNewDeployment=True
+            )
+
+            print("✅ ECS service redeployment triggered")
             return True
+
         except Exception as e:
-            print("❌ Self-heal failed:", e)
+            print("❌ ECS self-heal failed:", e)
             return False
+
     return False
 
 def in_cooldown(signature: str) -> bool:
