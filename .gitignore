@@ -16,10 +16,12 @@ mlruns/
 # DVC cache 
 .dvc/cache/
 
+# Terraform 
+*.tfvars
+infra/terraform.tfvars
+
 jenkins-infra/.terraform/
 jenkins-infra/.terraform.lock.hcl
-jenkins-infra/jenkins_key
-jenkins-infra/jenkins_key.pub
 jenkins-infra/terraform.tfstate
 jenkins-infra/terraform.tfstate.backup
 
@@ -31,3 +33,4 @@ infra/terraform.tfstate
 infra/terraform.tfstate.1770963658.backup
 infra/terraform.tfstate.backup
 infra/terraform_1.6.6_linux_amd64.zip
+
