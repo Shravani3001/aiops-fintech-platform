@@ -37,9 +37,10 @@ BASELINE_FALLBACKS = {
     "ContainerRestartLoop": {"mean": 0, "std": 1},
 }
 MAX_OPENAI_CALLS_PER_METRIC = 3
+MONGO_URI = os.getenv("MONGO_URI")
 
-client = MongoClient("mongodb://mongodb:27017/", serverSelectionTimeoutMS=2000)
-db = client["credit_risk"]
+client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+db = client.get_database()
 borrowers_col = db["borrowers"]
 unknown_events_col = db["unknown_events"]
 
