@@ -7,7 +7,6 @@ services:
     ports: 
       - "8000:8000" 
     depends_on: 
-      - mongodb
       - mlflow
     extra_hosts:
       - "localhost:host-gateway"
@@ -80,20 +79,10 @@ services:
     volumes:
       - ./api/ml/data/processed:/app/api/ml/data/processed
     command: python seed_borrowers.py
-    depends_on:
-      - mongodb
+    environment:
+      - MONGO_URI=${MONGO_URI}
     networks:
       - aiops-fintech-network
-
-  mongodb:
-    image: mongo:6.0
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - aiops-fintech-network
-    restart: unless-stopped
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:v3.9.0
@@ -114,7 +103,6 @@ services:
 
 volumes:
   grafana-data:
-  mongo-data:
   mlruns:
 
 networks:

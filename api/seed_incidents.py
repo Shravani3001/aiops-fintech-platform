@@ -1,8 +1,11 @@
 from pymongo import MongoClient
 from datetime import datetime, timezone
+import os
 
-mongo = MongoClient("mongodb://mongodb:27017/")
-db = mongo["credit_risk"]
+MONGO_URI = os.getenv("MONGO_URI")
+mongo = MongoClient(MONGO_URI)
+
+db = mongo.get_database()
 incidents = db["incidents"]
 
 now = datetime.now(timezone.utc)

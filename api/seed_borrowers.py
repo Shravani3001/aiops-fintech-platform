@@ -1,23 +1,27 @@
 import pandas as pd
 from pymongo import MongoClient
 import time
+import os
 
-MONGO_URI = "mongodb://mongodb:27017/"
+MONGO_URI = os.getenv("MONGO_URI")
+
+if not MONGO_URI:
+    raise Exception("MONGO_URI not set in environment variables")
 
 # Wait for MongoDB
 for i in range(10):
     try:
-        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+        client = MongoClient(MONGO_URI)
         client.admin.command("ping")
         print("MongoDB connected")
         break
     except Exception:
-        print("Mongo not ready, retrying...")
+        print(f"Mongo not ready, retrying... ({e})")
         time.sleep(2)
 else:
     raise Exception("MongoDB not reachable")
 
-db = client["credit_risk"]
+db = client.get_database()
 borrowers = db["borrowers"]
 
 # Load processed borrowers
