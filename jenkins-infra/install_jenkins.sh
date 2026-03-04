@@ -1,0 +1,53 @@
+#!/bin/bash
+set -e
+
+echo "Updating system..."
+apt update
+
+echo "Installing Java..."
+apt install -y openjdk-21-jdk
+
+echo "Installing Docker..."
+apt install -y docker.io
+systemctl enable docker
+systemctl start docker
+
+echo "Installing Git and AWS CLI..."
+apt install -y git awscli
+
+echo "Allowing ubuntu user to run docker..."
+usermod -aG docker ubuntu
+
+echo "Creating Jenkins directory..."
+mkdir -p /opt/jenkins
+chown ubuntu:ubuntu /opt/jenkins
+
+echo "Downloading Jenkins..."
+cd /opt/jenkins
+wget https://get.jenkins.io/war-stable/latest/jenkins.war
+
+echo "Creating Jenkins service..."
+
+cat <<EOF > /etc/systemd/system/jenkins.service
+[Unit]
+Description=Jenkins
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/jenkins
+ExecStart=/usr/bin/java -Xms256m -Xmx512m -jar /opt/jenkins/jenkins.war
+Restart=always
+RestartSec=10
+Environment="JENKINS_HOME=/home/ubuntu/.jenkins"
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable jenkins
+systemctl start jenkins
+
+echo "Jenkins installation complete."
