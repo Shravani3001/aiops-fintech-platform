@@ -38,9 +38,25 @@ BASELINE_FALLBACKS = {
 }
 MAX_OPENAI_CALLS_PER_METRIC = 3
 MONGO_URI = os.getenv("MONGO_URI")
+print(f"[DEBUG] MONGO_URI = {repr(MONGO_URI)}")  # repr() reveals hidden characters
 
-client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-db = client.get_database()
+MONGO_URI = os.getenv("MONGO_URI")
+
+client = None
+for i in range(5):
+    try:
+        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000, tls=True)
+        client.server_info()
+        print("✅ MongoDB connected")
+        break
+    except Exception as e:
+        print(f"Mongo connection failed attempt {i+1}: {e}")
+        time.sleep(3)
+
+if client is None:
+    raise Exception("MongoDB connection failed")
+
+db = client["credit_risk"]
 borrowers_col = db["borrowers"]
 unknown_events_col = db["unknown_events"]
 
