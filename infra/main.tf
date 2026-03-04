@@ -235,7 +235,7 @@ resource "aws_ecs_task_definition" "api" {
     }]
     environment = [
       { name = "MLFLOW_TRACKING_URI", value = "http://mlflow:5000"},
-      { name = "MONGO_URI", value = "mongodb+srv://aiops_user:Shr63000@aiops.q5fbml.mongodb.net/credit_risk?retryWrites=true&w=majority&appName=aiops"},
+      { name = "MONGO_URI", value = "mongodb+srv://aiops_user:iVuu5rgr4kgCcmvJ@aiops.q5fbml.mongodb.net/credit_risk?retryWrites=true&w=majority&appName=aiops"},
       { name  = "OPENAI_API_KEY", value = var.openai_api_key},
       { name  = "ECS_CLUSTER_NAME", value = "${var.project_name}-cluster"},
       { name  = "ECS_SERVICE_NAME", value = "${var.project_name}-service"},

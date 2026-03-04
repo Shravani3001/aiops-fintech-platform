@@ -40,7 +40,8 @@ MAX_OPENAI_CALLS_PER_METRIC = 3
 MONGO_URI = os.getenv("MONGO_URI")
 
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-db = client.get_database()
+client.server_info()
+db = client["credit_risk"]
 borrowers_col = db["borrowers"]
 unknown_events_col = db["unknown_events"]
 
