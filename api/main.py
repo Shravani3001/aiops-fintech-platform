@@ -297,31 +297,26 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
        raise HTTPException(status_code=404, detail="Borrower not found")
     borrower["_id"] = str(borrower["_id"])
 
-    # Prepare data for model (remove non-features)
-    features = borrower.copy()
-    features.pop("_id", None)
-    features.pop("borrower_id", None)
-    features.pop("loan_default", None)  # target, not input
+    # Load training feature order
+    feature_columns = joblib.load("/app/feature_columns.joblib")
 
-    features = ["income", "previous_defaults"]
-
-    df = pd.DataFrame([{
-      "income": borrower.get("income", 0),
-      "previous_defaults": borrower.get("previous_defaults", 0)
-    }])
+    # Build model input in the exact order used during training
+    data = {col: borrower.get(col) for col in feature_columns}
+    df = pd.DataFrame([data])
 
     # Encode categoricals (same as training)
     df["employment_type"] = df["employment_type"].map({
-        "salaried": 0,
-        "self-employed": 1
+       "salaried": 0,
+       "self-employed": 1
     })
 
     df["employer_category"] = df["employer_category"].map({
-        "private": 0,
-        "government": 1,
-        "business": 2
+       "private": 0,
+       "govt": 1,
+       "business": 2,
+       "government": 1
     })
-  
+    df = df.fillna(0)
     probability = float(model.predict(df)[0])
 
     latency = time.time() - start_time

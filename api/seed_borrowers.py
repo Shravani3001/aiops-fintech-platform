@@ -15,7 +15,7 @@ for i in range(10):
         client.admin.command("ping")
         print("MongoDB connected")
         break
-    except Exception:
+    except Exception as e:
         print(f"Mongo not ready, retrying... ({e})")
         time.sleep(2)
 else:

@@ -52,6 +52,7 @@ with mlflow.start_run(run_name="credit-risk-training"):
         random_state=42
     )
     model.fit(X_train, y_train)
+    joblib.dump(list(X.columns), "api/ml/feature_columns.joblib")
 
     # Evaluate
     y_pred = model.predict(X_test)
