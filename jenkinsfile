@@ -45,41 +45,40 @@ pipeline {
     stage('Deploy to ECS') {
       steps {
         sh '''
-          # Get current task definition
-          TASK_DEF=$(aws ecs describe-task-definition \
-            --task-definition aiops-fintech-task \
-            --region $AWS_REGION \
-            --query 'taskDefinition' \
-            --output json)
+    TASK_DEF=$(aws ecs describe-task-definition \
+        --task-definition aiops-fintech-task \
+        --region $AWS_REGION \
+        --query 'taskDefinition' \
+        --output json)
 
-          # Update image in task definition
-          NEW_TASK_DEF=$(echo $TASK_DEF | python3 -c "
+    NEW_TASK_DEF=$(echo "$TASK_DEF" | python3 - <<EOF
     import json,sys
-    td = json.load(sys.stdin)
-    for c in td['containerDefinitions']:
-      if c['name'] == 'credit-risk-api':
-        c['image'] = '$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG'
-    # Remove read-only fields
-    for k in ['taskDefinitionArn','revision','status','requiresAttributes','compatibilities','registeredAt','registeredBy']:
-      td.pop(k, None)
+    td=json.load(sys.stdin)
+
+    for c in td["containerDefinitions"]:
+      if c["name"]=="credit-risk-api":
+          c["image"]="$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+
+    for k in ["taskDefinitionArn","revision","status","requiresAttributes","compatibilities","registeredAt","registeredBy"]:
+      td.pop(k,None)
+
     print(json.dumps(td))
-    ")
+    EOF
+    )
 
-          # Register new task definition revision
-          NEW_REVISION=$(echo $NEW_TASK_DEF | aws ecs register-task-definition \
-            --region $AWS_REGION \
-            --cli-input-json file:///dev/stdin \
-            --query 'taskDefinition.taskDefinitionArn' \
-            --output text)
+    NEW_REVISION=$(echo "$NEW_TASK_DEF" | aws ecs register-task-definition \
+      --region $AWS_REGION \
+      --cli-input-json file:///dev/stdin \
+      --query 'taskDefinition.taskDefinitionArn' \
+      --output text)
 
-          # Update service with new revision
-          aws ecs update-service \
-            --region $AWS_REGION \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_SERVICE \
-            --task-definition $NEW_REVISION \
-            --force-new-deployment
-        '''
+    aws ecs update-service \
+      --region $AWS_REGION \
+      --cluster $ECS_CLUSTER \
+      --service $ECS_SERVICE \
+      --task-definition $NEW_REVISION \
+      --force-new-deployment
+    '''
       }
     }
   }
