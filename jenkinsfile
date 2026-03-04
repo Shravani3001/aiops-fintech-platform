@@ -75,7 +75,7 @@ pipeline {
       --region $AWS_REGION \
       --cluster $ECS_CLUSTER \
       --service $ECS_SERVICE \
-      --task-definition $NEW_REVISION \
+      --task-definition $REVISION \
       --force-new-deployment
     '''
       }
