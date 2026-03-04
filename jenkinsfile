@@ -46,18 +46,24 @@ pipeline {
       steps {
         sh '''
     TASK_DEF=$(aws ecs describe-task-definition \
-        --task-definition aiops-fintech-task \
-        --region $AWS_REGION \
-        --query 'taskDefinition' \
-        --output json)
+      --task-definition aiops-fintech-task \
+      --region $AWS_REGION)
 
     NEW_IMAGE="$AWS_ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
   
-    NEW_TASK_DEF=$(echo $TASK_DEF | \
-      jq --arg IMAGE "$NEW_IMAGE" \
-      '.taskDefinition |
-       .containerDefinitions[0].image=$IMAGE |
-       del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredAt,.registeredBy)')
+    NEW_TASK_DEF=$(echo "$TASK_DEF" | jq --arg IMAGE "$NEW_IMAGE" '
+      .taskDefinition
+    |  .containerDefinitions[0].image=$IMAGE
+    |  del(
+    .taskDefinitionArn,
+    .revision,
+    .status,
+    .requiresAttributes,
+    .compatibilities,
+    .registeredAt,
+    .registeredBy
+    )
+    ')
 
     REVISION=$(aws ecs register-task-definition \
       --region $AWS_REGION \
