@@ -306,8 +306,8 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
     features = ["income", "previous_defaults"]
 
     df = pd.DataFrame([{
-      "income": borrower["income"],
-      "previous_defaults": borrower["previous_defaults"]
+      "income": borrower.get("income", 0),
+      "previous_defaults": borrower.get("previous_defaults", 0)
     }])
 
     # Encode categoricals (same as training)
