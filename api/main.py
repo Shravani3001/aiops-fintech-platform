@@ -277,6 +277,8 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
 
     # Fetch borrower from MongoDB
     borrower = borrowers_col.find_one({"borrower_id": borrower_id})
+    if borrower:
+        borrower["_id"] = str(borrower["_id"])
     if not borrower:
         raise HTTPException(status_code=404, detail="Borrower not found")
 
