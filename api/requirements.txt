@@ -10,3 +10,4 @@ python-dotenv
 docker
 mlflow
 boto3
+dnspython
