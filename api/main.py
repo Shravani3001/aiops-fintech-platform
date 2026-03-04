@@ -303,7 +303,12 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
     features.pop("borrower_id", None)
     features.pop("loan_default", None)  # target, not input
 
-    df = pd.DataFrame([features])
+    features = ["income", "previous_defaults"]
+
+    df = pd.DataFrame([{
+      "income": borrower["income"],
+      "previous_defaults": borrower["previous_defaults"]
+    }])
 
     # Encode categoricals (same as training)
     df["employment_type"] = df["employment_type"].map({
