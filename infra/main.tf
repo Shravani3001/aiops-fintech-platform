@@ -134,6 +134,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+
 ################################
 # ECR 
 ################################
@@ -253,6 +254,7 @@ resource "aws_ecs_task_definition" "api" {
   }])
   depends_on = [aws_cloudwatch_log_group.ecs_logs]
 }
+
 
 resource "aws_ecs_service" "api" {
   name            = "${var.project_name}-service"
