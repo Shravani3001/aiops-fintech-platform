@@ -7,13 +7,10 @@ apt update
 echo "Installing Java..."
 apt install -y openjdk-21-jdk
 
-echo "Installing Docker..."
-apt install -y docker.io
+echo "Installing base tools..."
+apt install -y docker.io git awscli jq
 systemctl enable docker
 systemctl start docker
-
-echo "Installing Git and AWS CLI..."
-apt install -y git awscli
 
 echo "Allowing ubuntu user to run docker..."
 usermod -aG docker ubuntu
