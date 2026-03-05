@@ -21,7 +21,7 @@ from pymongo.errors import ServerSelectionTimeoutError
 from fastapi import Request
 from pydantic import BaseModel
 
-model = joblib.load("credit_risk_model.joblib")
+model = joblib.load("api/ml/credit_risk_model.joblib")
 
 client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 SAFE_FIXES = {
@@ -299,7 +299,7 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
     borrower["_id"] = str(borrower["_id"])
 
     # Load training feature order
-    feature_columns = joblib.load("api/ml/feature_columns.joblib")
+    feature_columns = joblib.load("ml/feature_columns.joblib")
 
     # Build model input in the exact order used during training
     data = {col: borrower.get(col) for col in feature_columns}
