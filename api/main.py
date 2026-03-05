@@ -21,7 +21,7 @@ from pymongo.errors import ServerSelectionTimeoutError
 from fastapi import Request
 from pydantic import BaseModel
 
-model = joblib.load("api/ml/credit_risk_model.joblib")
+model = joblib.load("ml/credit_risk_model.joblib")
 
 client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 SAFE_FIXES = {

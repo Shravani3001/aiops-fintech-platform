@@ -4,11 +4,11 @@ WORKDIR /app
 
 RUN pip install docker
 
-COPY api/requirements.txt .
+COPY requirements.txt .
 
 RUN pip install --no-cache-dir --default-timeout=300 --retries 10 -r requirements.txt
 
-COPY api/ .
+COPY . .
 
 EXPOSE 8000
 
