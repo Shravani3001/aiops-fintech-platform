@@ -8,6 +8,8 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir --default-timeout=300 --retries 10 -r requirements.txt
 
+COPY credit_risk_model.joblib /app/credit_risk_model.joblib
+
 COPY . .
 
 EXPOSE 8000
