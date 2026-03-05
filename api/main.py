@@ -298,7 +298,7 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
     borrower["_id"] = str(borrower["_id"])
 
     # Load training feature order
-    feature_columns = joblib.load("/app/api/feature_columns.joblib")
+    feature_columns = joblib.load("/app/api/ml/feature_columns.joblib")
 
     # Build model input in the exact order used during training
     data = {col: borrower.get(col) for col in feature_columns}
