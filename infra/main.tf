@@ -240,7 +240,7 @@ resource "aws_ecs_task_definition" "api" {
       { name  = "OPENAI_API_KEY", value = var.openai_api_key},
       { name  = "ECS_CLUSTER_NAME", value = "${var.project_name}-cluster"},
       { name  = "ECS_SERVICE_NAME", value = "${var.project_name}-service"},
-      { name  = "AWS_REGION", value = var.aws_region}
+      { name  = "AWS_DEFAULT_REGION", value = var.aws_region}
     ]
 
     logConfiguration = {

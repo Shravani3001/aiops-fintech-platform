@@ -4,12 +4,12 @@ groups:
   - alert: HighPredictionLatency
     expr: histogram_quantile(
             0.95,
-            sum(rate(credit_model_prediction_latency_seconds_bucket[5m])) by (le)
-          ) > 0.3
-    for: 2m
+            sum(rate(credit_model_prediction_latency_seconds_bucket[1m])) by (le)
+          ) > 0.01
+    for: 10s
     labels:
       severity: critical
     annotations:
       summary: "High prediction latency detected"
-      description: "p95 latency exceeded 300ms for 2 minutes"
+      description: "p95 latency exceeded 10ms for 10 seconds"
       current_value: "{{ $value }}"

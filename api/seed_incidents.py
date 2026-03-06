@@ -1,9 +1,24 @@
 from pymongo import MongoClient
 from datetime import datetime, timezone
 import os
+import time
 
 MONGO_URI = os.getenv("MONGO_URI")
-mongo = MongoClient(MONGO_URI)
+if not MONGO_URI:
+    raise Exception("MONGO_URI not set in environment variables")
+
+# Wait for MongoDB connection
+for i in range(10):
+    try:
+        mongo = MongoClient(MONGO_URI)
+        mongo.admin.command("ping")
+        print("MongoDB connected")
+        break
+    except Exception as e:
+        print(f"Mongo not ready, retrying... ({e})")
+        time.sleep(2)
+else:
+    raise Exception("MongoDB not reachable")
 
 db = mongo.get_database()
 incidents = db["incidents"]
@@ -13,6 +28,7 @@ now = datetime.now(timezone.utc)
 seed_data = [
     {
         "metric": "HighPredictionLatency",
+        "signature": "HighPredictionLatency:critical",
         "baseline_mean": 0.02,
         "baseline_std": 0.005,
         "severity": "critical",
@@ -24,6 +40,7 @@ seed_data = [
     },
     {
         "metric": "High5xxErrorRate",
+        "signature": "High5xxErrorRate:critical",
         "baseline_mean": 0.01,
         "baseline_std": 0.005,
         "severity": "critical",
@@ -35,6 +52,7 @@ seed_data = [
     },
     {
         "metric": "ServiceDown",
+        "signature": "ServiceDown:critical",
         "baseline_mean": 1,
         "baseline_std": 0,
         "severity": "critical",
@@ -46,6 +64,7 @@ seed_data = [
     },
     {
         "metric": "TrafficSpike",
+        "signature": "TrafficSpike:critical",
         "baseline_mean": 800,
         "baseline_std": 200,
         "severity": "warning",
@@ -57,6 +76,7 @@ seed_data = [
     },
     {
         "metric": "ContainerRestartLoop",
+        "signature": "ContainerRestartLoop:critical",
         "baseline_mean": 0,
         "baseline_std": 1,
         "severity": "critical",

@@ -26,9 +26,8 @@ client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 SAFE_FIXES = {
     "restart service",
     "clear cache",
-    "restart api container"
 }
-COOLDOWN_MINUTES = 10
+COOLDOWN_MINUTES = 0
 
 BASELINE_FALLBACKS = {
     "HighPredictionLatency": {"mean": 0.02, "std": 0.005},
@@ -194,8 +193,14 @@ def apply_fix(fix: str):
         try:
             cluster = os.getenv("ECS_CLUSTER_NAME")
             service = os.getenv("ECS_SERVICE_NAME")
+            region  = os.getenv("AWS_DEFAULT_REGION" or "ap-south-1")
 
-            ecs = boto3.client("ecs", region_name=os.getenv("AWS_REGION"))
+            print("DEBUG ECS_CLUSTER_NAME =", cluster)
+            print("DEBUG ECS_SERVICE_NAME =", service)
+            print("DEBUG AWS_DEFAULT_REGION =", region)
+            
+
+            ecs = boto3.client("ecs", region_name=os.getenv("AWS_DEFAULT_REGION"))
 
             ecs.update_service(
                 cluster=cluster,
@@ -530,7 +535,7 @@ async def analyze_incident(request: Request):
 
             # Special case override
             if metric == "HighPredictionLatency" and computed_severity == "critical":
-               fix = "restart api container"
+               fix = "restart service"
 
             logging.warning(
                 f"Auto-heal check → fix='{fix}', in_SAFE_FIXES={fix in SAFE_FIXES}, severity={computed_severity}"
