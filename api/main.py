@@ -21,12 +21,12 @@ from pymongo.errors import ServerSelectionTimeoutError
 from fastapi import Request
 from pydantic import BaseModel
 
-model = joblib.load("ml/credit_risk_model.joblib")
 
 client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 SAFE_FIXES = {
     "restart service",
-    "clear cache"
+    "clear cache",
+    "restart api container"
 }
 COOLDOWN_MINUTES = 10
 
@@ -40,8 +40,6 @@ BASELINE_FALLBACKS = {
 MAX_OPENAI_CALLS_PER_METRIC = 3
 MONGO_URI = os.getenv("MONGO_URI")
 print(f"[DEBUG] MONGO_URI = {repr(MONGO_URI)}")  # repr() reveals hidden characters
-
-MONGO_URI = os.getenv("MONGO_URI")
 
 client = None
 for i in range(5):
@@ -63,8 +61,9 @@ unknown_events_col = db["unknown_events"]
 
 MODEL_NAME = os.getenv("MODEL_NAME", "credit_risk_model")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "production")
-MODEL_PATH = "/app/credit_risk_model.joblib"
+MODEL_PATH = "/app/api/ml/credit_risk_model.joblib"
 model = None
+feature_columns = None
 
 class BorrowerIdRequest(BaseModel):
     borrower_id: str
@@ -91,9 +90,8 @@ REQUEST_LATENCY = Histogram(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global model
+    global model, feature_columns
     print("🔥 LIFESPAN STARTED")
-
     # MongoDB
     try:
       client.admin.command("ping")
@@ -105,7 +103,10 @@ async def lifespan(app: FastAPI):
     try:
         print("🚀 Loading model from file:", MODEL_PATH)
         model = joblib.load(MODEL_PATH)
+        feature_columns = joblib.load("/app/api/ml/feature_columns.joblib")
+
         print("✅ MODEL LOADED:", type(model))
+        print("MODEL FEATURES:", model.feature_names_in_)
     except Exception:
         import traceback
         print("❌ MODEL LOAD FAILED")
@@ -298,9 +299,6 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
        raise HTTPException(status_code=404, detail="Borrower not found")
     borrower["_id"] = str(borrower["_id"])
 
-    # Load training feature order
-    feature_columns = joblib.load("ml/feature_columns.joblib")
-
     # Build model input in the exact order used during training
     data = {col: borrower.get(col) for col in feature_columns}
     df = pd.DataFrame([data])
@@ -309,7 +307,7 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
     df["employment_type"] = df["employment_type"].map({
        "salaried": 0,
        "self-employed": 1
-    })
+    }).fillna(0)
 
     df["employer_category"] = df["employer_category"].map({
        "private": 0,
