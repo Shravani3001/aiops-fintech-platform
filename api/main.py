@@ -318,7 +318,7 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
        "government": 1
     })
     df = df.fillna(0)
-    df = df.reindex(columns=feature_columns, fill_value=0)
+    df = df[feature_columns]
     probability = float(model.predict_proba(df)[0][1])
 
     latency = time.time() - start_time
