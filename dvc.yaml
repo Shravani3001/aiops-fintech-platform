@@ -1,0 +1,17 @@
+stages:
+
+  feature_engineering:
+    cmd: python3 api/ml/feature_engineering.py
+    deps:
+      - api/ml/data/raw/borrowers_raw.csv
+      - api/ml/feature_engineering.py
+    outs:
+      - api/ml/data/processed/borrowers_processed.csv
+
+  train_model:
+    cmd: python3 api/ml/train.py
+    deps:
+      - api/ml/data/processed/borrowers_processed.csv
+      - api/ml/train.py
+    outs:
+      - api/ml/credit_risk_model.joblib

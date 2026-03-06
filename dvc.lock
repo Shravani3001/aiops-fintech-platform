@@ -1,0 +1,40 @@
+schema: '2.0'
+stages:
+  feature_engineering:
+    cmd: python3 api/ml/feature_engineering.py
+    deps:
+    - path: api/ml/data/raw/borrowers_raw.csv
+      hash: md5
+      md5: df7b2f5e5ed775f042b02d946adbe381
+      size: 4012
+      isexec: true
+    - path: api/ml/feature_engineering.py
+      hash: md5
+      md5: eab3a02c0d81e17087cd88bb13d126bf
+      size: 1160
+      isexec: true
+    outs:
+    - path: api/ml/data/processed/borrowers_processed.csv
+      hash: md5
+      md5: 34f5676078e305cfd327f1ffda230a0a
+      size: 4790
+      isexec: true
+  train_model:
+    cmd: python3 api/ml/train.py
+    deps:
+    - path: api/ml/data/processed/borrowers_processed.csv
+      hash: md5
+      md5: 34f5676078e305cfd327f1ffda230a0a
+      size: 4790
+      isexec: true
+    - path: api/ml/train.py
+      hash: md5
+      md5: 281dacb38a5ad5808a9b86e9ee535ee0
+      size: 2798
+      isexec: true
+    outs:
+    - path: api/ml/credit_risk_model.joblib
+      hash: md5
+      md5: ff0931ac107830f1fb5da4daa09503a4
+      size: 202937
+      isexec: true
