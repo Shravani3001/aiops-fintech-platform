@@ -26,6 +26,11 @@ services:
       - MLFLOW_REGISTRY_URI=http://localhost:5000
       - MLFLOW_ENABLE_PROXY_FIX=true
       - MLFLOW_HOST=0.0.0.0
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - ECS_CLUSTER_NAME=${ECS_CLUSTER_NAME}
+      - ECS_SERVICE_NAME=${ECS_SERVICE_NAME}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     networks:
       - aiops-fintech-network
 

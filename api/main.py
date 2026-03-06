@@ -195,9 +195,9 @@ def apply_fix(fix: str):
             service = os.getenv("ECS_SERVICE_NAME")
             region  = os.getenv("AWS_DEFAULT_REGION" or "ap-south-1")
 
-            print("DEBUG ECS_CLUSTER_NAME =", cluster)
-            print("DEBUG ECS_SERVICE_NAME =", service)
-            print("DEBUG AWS_DEFAULT_REGION =", region)
+            print(f"DEBUG ECS_CLUSTER_NAME = {os.getenv('ECS_CLUSTER_NAME')}")
+            print(f"DEBUG ECS_SERVICE_NAME = {os.getenv('ECS_SERVICE_NAME')}")
+            print(f"DEBUG AWS_DEFAULT_REGION = {os.getenv('AWS_DEFAULT_REGION')}")
             
 
             ecs = boto3.client("ecs", region_name=os.getenv("AWS_DEFAULT_REGION"))
