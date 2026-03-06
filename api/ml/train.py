@@ -26,6 +26,7 @@ for col in ["employment_type", "employer_category"]:
 # Features & target
 # -------------------------
 X = df.drop(columns=["borrower_id", "loan_default"])
+print("Training features:", list(X.columns))
 y = df["loan_default"]
 
 # -------------------------
