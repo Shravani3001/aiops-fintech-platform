@@ -61,7 +61,7 @@ unknown_events_col = db["unknown_events"]
 
 MODEL_NAME = os.getenv("MODEL_NAME", "credit_risk_model")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "production")
-MODEL_PATH = "/app/api/ml/credit_risk_model.joblib"
+MODEL_PATH = "/app/ml/credit_risk_model.joblib"
 model = None
 feature_columns = None
 
@@ -103,7 +103,7 @@ async def lifespan(app: FastAPI):
     try:
         print("🚀 Loading model from file:", MODEL_PATH)
         model = joblib.load(MODEL_PATH)
-        feature_columns = joblib.load("/app/api/ml/feature_columns.joblib")
+        feature_columns = joblib.load("/app/ml/feature_columns.joblib")
 
         print("✅ MODEL LOADED:", type(model))
         print("MODEL FEATURES:", model.feature_names_in_)
