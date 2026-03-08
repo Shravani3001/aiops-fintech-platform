@@ -20,6 +20,11 @@ from datetime import datetime, timedelta, timezone
 from pymongo.errors import ServerSelectionTimeoutError
 from fastapi import Request
 from pydantic import BaseModel
+import mlflow.pyfunc
+
+mlflow.set_tracking_uri("http://mlflow:5000")
+mlflow.set_registry_uri("http://mlflow:5000")
+MODEL_URI = "models:/credit_risk_model/latest"
 
 
 client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -27,7 +32,7 @@ SAFE_FIXES = {
     "restart service",
     "clear cache",
 }
-COOLDOWN_MINUTES = 0
+COOLDOWN_MINUTES = 10
 
 BASELINE_FALLBACKS = {
     "HighPredictionLatency": {"mean": 0.02, "std": 0.005},
@@ -106,15 +111,32 @@ async def lifespan(app: FastAPI):
 
         print("✅ MODEL LOADED:", type(model))
         print("MODEL FEATURES:", model.feature_names_in_)
-    except Exception:
+    except Exception as e:
         import traceback
         print("❌ MODEL LOAD FAILED")
+        print("⚠️ MODEL LOAD FAILED, starting API without model")
+        print(e)
         traceback.print_exc()
         model = None
-
+        feature_columns = None
     yield
 # ✅ Create app ONLY ONCE
 app = FastAPI(lifespan=lifespan)
+
+def load_model_with_retry(model_uri, retries=10, wait_sec=5):
+    """
+    Tries to load the MLflow model multiple times before failing.
+    Useful to avoid restart loops if MLflow or the model is not ready.
+    """
+    for i in range(retries):
+        try:
+            model = mlflow.pyfunc.load_model(model_uri)
+            print(f"✅ Model loaded successfully from {model_uri}")
+            return model
+        except Exception as e:
+            print(f"⚠️ Attempt {i+1}: Model not ready yet: {e}")
+            time.sleep(wait_sec)
+    raise RuntimeError(f"❌ Failed to load model from {model_uri} after {retries} attempts")
 
 def serialize_mongo(doc):
     if isinstance(doc, list):
@@ -194,11 +216,6 @@ def apply_fix(fix: str):
             cluster = os.getenv("ECS_CLUSTER_NAME")
             service = os.getenv("ECS_SERVICE_NAME")
             region  = os.getenv("AWS_DEFAULT_REGION" or "ap-south-1")
-
-            print(f"DEBUG ECS_CLUSTER_NAME = {os.getenv('ECS_CLUSTER_NAME')}")
-            print(f"DEBUG ECS_SERVICE_NAME = {os.getenv('ECS_SERVICE_NAME')}")
-            print(f"DEBUG AWS_DEFAULT_REGION = {os.getenv('AWS_DEFAULT_REGION')}")
-            
 
             ecs = boto3.client("ecs", region_name=os.getenv("AWS_DEFAULT_REGION"))
 

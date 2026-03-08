@@ -4,14 +4,35 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, roc_auc_score, precision_score, recall_score
 import joblib
+import os
 import mlflow
 import mlflow.sklearn
+import time
+import requests
+
+mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
+
+for i in range(10):
+    try:
+        r = requests.get(f"{MLFLOW_URI}/api/2.0/mlflow/experiments/list")
+        if r.status_code == 200:
+            print("✅ MLflow is ready")
+            break
+    except Exception:
+        print("⏳ Waiting for MLflow...")
+        time.sleep(3)
+else:
+    raise RuntimeError("MLflow server not responding")
+mlflow.set_tracking_uri(mlflow_tracking_uri)
+mlflow.set_experiment("credit-risk-training")
 
 # -------------------------
 # Load processed data
 # -------------------------
 data_path = "api/ml/data/processed/borrowers_processed.csv"
+
 df = pd.read_csv(data_path)
+
 
 # -------------------------
 # Encode categorical columns
@@ -76,7 +97,7 @@ with mlflow.start_run(run_name="credit-risk-training"):
 
     # Log & register model
     mlflow.sklearn.log_model(
-        model,
+        sk_model=model,
         artifact_path="model",
         registered_model_name="credit_risk_model"
     )

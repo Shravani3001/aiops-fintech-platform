@@ -2,8 +2,8 @@ groups:
 - name: unknown-alerts
   rules:
   - alert: UnknownTestAlert
-    expr: sum(rate(http_requests_total[1m])) > 0
-    for: 10s
+    expr: sum(rate(http_requests_total[1m])) > 100
+    for: 30s
     labels:
       severity: critical
       category: test

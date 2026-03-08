@@ -1,8 +1,8 @@
 import pandas as pd
 
 # Load raw data
-raw_path = "ml/data/raw/borrowers_raw.csv"
-processed_path = "ml/data/processed/borrowers_processed.csv"
+raw_path = "api/ml/data/raw/borrowers_raw.csv"
+processed_path = "api/ml/data/processed/borrowers_processed.csv"
 
 df = pd.read_csv(raw_path)
 
