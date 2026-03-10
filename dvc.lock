@@ -29,13 +29,13 @@ stages:
       isexec: true
     - path: api/ml/train.py
       hash: md5
-      md5: b78a346be0c3bd188331fa411e7fb8d5
-      size: 2642
+      md5: 67148fdde4705b68478ac61c2a8a5957
+      size: 3203
       isexec: true
     outs:
     - path: api/ml/credit_risk_model.joblib
       hash: md5
-      md5: ff0931ac107830f1fb5da4daa09503a4
+      md5: 3c86c1621bf7797bfa4ef131062fe2f1
       size: 202937
       isexec: true
     - path: api/ml/feature_columns.joblib

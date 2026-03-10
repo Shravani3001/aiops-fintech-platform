@@ -10,20 +10,21 @@ import mlflow.sklearn
 import time
 import requests
 
-mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
+mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+
+mlflow.set_tracking_uri(mlflow_tracking_uri)
+mlflow.set_registry_uri(mlflow_tracking_uri)
 
 for i in range(10):
     try:
-        r = requests.get(f"{MLFLOW_URI}/api/2.0/mlflow/experiments/list")
-        if r.status_code == 200:
-            print("✅ MLflow is ready")
-            break
+        mlflow.get_experiment_by_name("Default")
+        print("✅ MLflow is ready")
+        break
     except Exception:
         print("⏳ Waiting for MLflow...")
         time.sleep(3)
 else:
     raise RuntimeError("MLflow server not responding")
-mlflow.set_tracking_uri(mlflow_tracking_uri)
 mlflow.set_experiment("credit-risk-training")
 
 # -------------------------

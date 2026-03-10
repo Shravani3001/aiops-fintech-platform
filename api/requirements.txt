@@ -8,6 +8,6 @@ pymongo
 openai
 python-dotenv
 docker
-mlflow
+mlflow==2.12.2
 boto3
 dnspython

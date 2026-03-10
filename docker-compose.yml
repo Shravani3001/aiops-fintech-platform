@@ -10,8 +10,8 @@ services:
     extra_hosts:
       - "localhost:host-gateway"
     depends_on:
-      mlflow:
-        condition: service_healthy
+      - mlflow
+        
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - mlruns:/mlruns
@@ -92,29 +92,18 @@ services:
       - aiops-fintech-network
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v3.9.0
+    image: ghcr.io/mlflow/mlflow:v2.12.2
     container_name: mlflow
     ports:
       - "5000:5000"
-    user: root
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000"]
-      interval: 5s
-      retries: 12
     volumes:
       - mlruns:/mlruns
-    environment:
-      - MLFLOW_SERVER_ALLOWED_HOSTS=*
     command: >
-      sh -c "chown -R 1000:1000 /mlruns && mlflow server \
-        --backend-store-uri sqlite:///mlflow.db \
-        --default-artifact-root /mlruns \
-        --host 0.0.0.0 \
-        --port 5000"
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
     networks:
-      aiops-fintech-network:
-        aliases:
-         - mlflow
+      - aiops-fintech-network
 
 volumes:
   grafana-data:
