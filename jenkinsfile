@@ -15,7 +15,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         dir('api') {
-          sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
+          sh 'docker build --no-cache -t $ECR_REPO:$IMAGE_TAG .'
         }
       }
     }

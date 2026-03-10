@@ -4,7 +4,6 @@ import pandas as pd
 import time
 import asyncio
 import os
-import joblib
 import docker
 import json
 import logging
@@ -22,9 +21,11 @@ from fastapi import Request
 from pydantic import BaseModel
 import mlflow.pyfunc
 
-mlflow.set_tracking_uri("http://mlflow:5000")
-mlflow.set_registry_uri("http://mlflow:5000")
-MODEL_URI = "models:/credit_risk_model/latest"
+MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI")
+
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+mlflow.set_registry_uri(MLFLOW_TRACKING_URI)
+MODEL_URI = "models:/credit_risk_model/Production"
 
 
 client_openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -65,7 +66,6 @@ unknown_events_col = db["unknown_events"]
 
 MODEL_NAME = os.getenv("MODEL_NAME", "credit_risk_model")
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "production")
-MODEL_PATH = "/app/ml/credit_risk_model.joblib"
 model = None
 feature_columns = None
 
@@ -94,31 +94,28 @@ REQUEST_LATENCY = Histogram(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global model, feature_columns
+    global model
     print("🔥 LIFESPAN STARTED")
     # MongoDB
     try:
-      client.admin.command("ping")
-      print("✅ MongoDB connected")
-    except Exception:
-      print("⚠️ MongoDB not available — continuing without blocking")
+       print("🚀 Loading model from MLflow Production registry")
+       model = load_model_with_retry(MODEL_URI)
 
-    # Load model (NO MLflow here)
-    try:
-        print("🚀 Loading model from file:", MODEL_PATH)
-        model = joblib.load(MODEL_PATH)
-        feature_columns = joblib.load("/app/ml/feature_columns.joblib")
+       # load feature columns from artifact
+       artifact_path = mlflow.artifacts.download_artifacts(
+         artifact_uri=f"{MODEL_URI}/feature_columns.joblib"
+       )
 
-        print("✅ MODEL LOADED:", type(model))
-        print("MODEL FEATURES:", model.feature_names_in_)
+       global feature_columns
+       import joblib
+       feature_columns = joblib.load(artifact_path)
+
+       print("✅ Model loaded from MLflow registry")
+
     except Exception as e:
-        import traceback
-        print("❌ MODEL LOAD FAILED")
-        print("⚠️ MODEL LOAD FAILED, starting API without model")
-        print(e)
-        traceback.print_exc()
-        model = None
-        feature_columns = None
+       print("❌ MODEL LOAD FAILED")
+       print(e)
+       model = None
     yield
 # ✅ Create app ONLY ONCE
 app = FastAPI(lifespan=lifespan)

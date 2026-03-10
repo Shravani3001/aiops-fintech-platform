@@ -9,12 +9,8 @@ services:
     user: root
     extra_hosts:
       - "localhost:host-gateway"
-    depends_on:
-      - mlflow
-        
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - mlruns:/mlruns
     restart: unless-stopped
     
     environment:
@@ -23,8 +19,8 @@ services:
       - PROM_URL=${PROM_URL}
       - LATENCY_THRESHOLD=${LATENCY_THRESHOLD}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
-      - MLFLOW_REGISTRY_URI=http://mlflow:5000
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+      - MLFLOW_REGISTRY_URI=${MLFLOW_REGISTRY_URI}
       - MLFLOW_ENABLE_PROXY_FIX=true
       - MLFLOW_HOST=0.0.0.0
       - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlruns   
@@ -91,23 +87,8 @@ services:
     networks:
       - aiops-fintech-network
 
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.12.2
-    container_name: mlflow
-    ports:
-      - "5000:5000"
-    volumes:
-      - mlruns:/mlruns
-    command: >
-      mlflow server
-      --host 0.0.0.0
-      --port 5000
-    networks:
-      - aiops-fintech-network
-
 volumes:
   grafana-data:
-  mlruns:
 
 networks:
   aiops-fintech-network:

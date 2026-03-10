@@ -10,7 +10,7 @@ import mlflow.sklearn
 import time
 import requests
 
-mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
 
 mlflow.set_tracking_uri(mlflow_tracking_uri)
 mlflow.set_registry_uri(mlflow_tracking_uri)
@@ -76,6 +76,8 @@ with mlflow.start_run(run_name="credit-risk-training"):
     )
     model.fit(X_train, y_train)
     joblib.dump(list(X.columns), "api/ml/feature_columns.joblib")
+
+    mlflow.log_artifact("api/ml/feature_columns.joblib")
 
     # Evaluate
     y_pred = model.predict(X_test)

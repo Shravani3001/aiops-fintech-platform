@@ -14,3 +14,7 @@ variable "openai_api_key" {
   type      = string
   sensitive = true
 }
+
+variable "mlflow_url" {
+  description = "MLflow server URL"
+}
