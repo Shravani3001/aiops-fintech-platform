@@ -34,3 +34,16 @@ infra/terraform.tfstate.1770963658.backup
 infra/terraform.tfstate.backup
 infra/terraform_1.6.6_linux_amd64.zip
 
+mlruns_host/
+mlruns_temp/
+mlflow-db/
+
+mlflow-infra/.terraform/
+mlflow-infra/.terraform.lock.hcl
+mlflow-infra/terraform.tfstate
+mlflow-infra/terraform.tfstate
+mlflow-infra/terraform.tfstate.backup
+
+# Terraform lock files
+*.lock.hcl
+
