@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-scikit-learn
+scikit-learn==1.7.2
 joblib
 pandas
 prometheus-client
@@ -11,3 +11,6 @@ docker
 mlflow==2.12.2
 boto3
 dnspython
+scipy==1.15.3
+pyyaml==5.4.1
+psutil==7.2.2
