@@ -29,7 +29,8 @@ pipeline {
               changes.contains("api/ml/") ||
               changes.contains("api/register_model.py") ||
               changes.contains("dvc.yaml") ||
-              changes.contains("dvc.lock")) {
+              changes.contains("dvc.lock") ||
+              changes.contains("jenkinsfile")) {
 
               env.TRAIN_MODEL = "true"
               echo "ML changes detected → model will retrain"
