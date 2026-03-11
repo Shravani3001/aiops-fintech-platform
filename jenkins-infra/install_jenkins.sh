@@ -8,7 +8,19 @@ echo "Installing Java..."
 apt install -y openjdk-21-jdk
 
 echo "Installing base tools..."
-apt install -y docker.io git awscli jq
+apt install -y docker.io git jq python3-pip unzip curl
+
+echo "Installing AWS CLI v2..."
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+echo "Installing DVC with S3 support..."
+pip3 install --no-cache-dir "dvc[s3]"
+
+echo "Fixing PATH for DVC..."
+ln -s /usr/local/bin/dvc /usr/bin/dvc || true
+
 systemctl enable docker
 systemctl start docker
 

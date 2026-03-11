@@ -165,6 +165,33 @@ resource "aws_security_group" "jenkins_sg" {
   }
 }
 
+resource "aws_iam_role" "jenkins_role" {
+  name = "${var.project_name}-jenkins-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "jenkins_dvc_access" {
+  role       = aws_iam_role.jenkins_role.name
+  policy_arn = "arn:aws:iam::927340403996:policy/dvc-s3-access"
+}
+
+resource "aws_iam_instance_profile" "jenkins_instance_profile" {
+  name = "${var.project_name}-jenkins-instance-profile"
+  role = aws_iam_role.jenkins_role.name
+}
+
 # ------------------------
 # Key Pair
 # ------------------------
@@ -182,8 +209,9 @@ resource "aws_instance" "jenkins" {
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
   key_name               = aws_key_pair.jenkins_key.key_name
+  iam_instance_profile   = aws_iam_instance_profile.jenkins_instance_profile.name
   user_data              = file("${path.module}/install_jenkins.sh")
-
+  
   tags = {
     Name = "${var.project_name}-jenkins-ec2"
   }

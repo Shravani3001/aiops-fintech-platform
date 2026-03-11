@@ -48,3 +48,12 @@ mlflow-infra/terraform.tfstate.backup
 *.lock.hcl
 
 /evaluation_metrics.json
+
+dvc-storage-infra/.terraform
+dvc-storage-infra/terraform.tfstate
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
