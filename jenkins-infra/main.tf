@@ -182,6 +182,76 @@ resource "aws_iam_role" "jenkins_role" {
   })
 }
 
+resource "aws_iam_policy" "jenkins_ecr_access" {
+  name = "jenkins-ecr-access"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:CompleteLayerUpload",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:PutImage",
+          "ecr:UploadLayerPart"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "jenkins_ecs_access" {
+  name = "jenkins-ecs-access"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:DescribeTaskDefinition",
+          "ecs:RegisterTaskDefinition",
+          "ecs:UpdateService",
+          "ecs:DescribeServices"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole"
+        ]
+        Resource = "arn:aws:iam::927340403996:role/aiops-fintech-ecs-task-exec"
+      }
+
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "jenkins_ecs_access_attach" {
+  role       = aws_iam_role.jenkins_role.name
+  policy_arn = aws_iam_policy.jenkins_ecs_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "jenkins_ecr_access_attach" {
+  role       = aws_iam_role.jenkins_role.name
+  policy_arn = aws_iam_policy.jenkins_ecr_access.arn
+}
+
 resource "aws_iam_role_policy_attachment" "jenkins_dvc_access" {
   role       = aws_iam_role.jenkins_role.name
   policy_arn = "arn:aws:iam::927340403996:policy/dvc-s3-access"

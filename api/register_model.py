@@ -37,6 +37,7 @@ with mlflow.start_run(run_name="credit-risk-training"):
         artifact_path="model",
         registered_model_name="credit_risk_model"
     )
+    mlflow.log_artifact("api/ml/feature_columns.joblib")
 client = MlflowClient()
 
 latest_version = client.get_latest_versions(
