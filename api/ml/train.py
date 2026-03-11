@@ -109,3 +109,5 @@ with mlflow.start_run(run_name="credit-risk-training"):
     joblib.dump(model, "api/ml/credit_risk_model.joblib")
 
 print("Model training completed and logged to MLflow.")
+
+# trigger retraining
