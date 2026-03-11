@@ -65,6 +65,14 @@ pipeline {
       }
     }
 
+    stage('Install ML Dependencies') {
+      steps {
+        sh '''
+          pip3 install mlflow scikit-learn pandas joblib
+        '''
+      }
+    }
+
     stage('Train Model (DVC Pipeline)') {
       when {
         expression { TRAIN_MODEL == "true" }
