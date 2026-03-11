@@ -28,8 +28,8 @@ print("New model ROC AUC:", roc_auc)
 # -------------------------
 # Log model to MLflow
 # -------------------------
-with mlflow.start_run() as run:
-
+with mlflow.start_run(run_name="credit-risk-training"):
+    mlflow.log_param("model_type", "RandomForest")
     mlflow.log_metric("roc_auc", roc_auc)
 
     mlflow.sklearn.log_model(
@@ -37,8 +37,20 @@ with mlflow.start_run() as run:
         artifact_path="model",
         registered_model_name="credit_risk_model"
     )
+client = MlflowClient()
 
-print("Model logged to MLflow")
+latest_version = client.get_latest_versions(
+    "credit_risk_model",
+    stages=["None"]
+)[0].version
+
+client.transition_model_version_stage(
+    name="credit_risk_model",
+    version=latest_version,
+    stage="Production"
+)
+
+print(f"Model version {latest_version} promoted to Production")
 
 # -------------------------
 # Compare with production model
