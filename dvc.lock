@@ -58,6 +58,30 @@ stages:
       isexec: true
     - path: api/register_model.py
       hash: md5
-      md5: e8741fc6916bff1909be6b7b66f4a9d5
-      size: 429
+      md5: 5a1d68256b0c82832b7eb021f72e4cd0
+      size: 2571
+      isexec: true
+  evaluate_model:
+    cmd: python3 api/ml/evaluate_model_light.py
+    deps:
+    - path: api/ml/credit_risk_model.joblib
+      hash: md5
+      md5: 3c86c1621bf7797bfa4ef131062fe2f1
+      size: 202937
+      isexec: true
+    - path: api/ml/data/processed/borrowers_processed.csv
+      hash: md5
+      md5: 34f5676078e305cfd327f1ffda230a0a
+      size: 4790
+      isexec: true
+    - path: api/ml/evaluate_model_light.py
+      hash: md5
+      md5: 95f59b589b0d1b3503d45a154961d21b
+      size: 1439
+      isexec: true
+    outs:
+    - path: evaluation_metrics.json
+      hash: md5
+      md5: 95b41da61c27c1696e18d14bcb3c5d43
+      size: 16
       isexec: true

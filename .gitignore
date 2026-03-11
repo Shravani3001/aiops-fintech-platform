@@ -47,3 +47,4 @@ mlflow-infra/terraform.tfstate.backup
 # Terraform lock files
 *.lock.hcl
 
+/evaluation_metrics.json

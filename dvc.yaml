@@ -18,9 +18,9 @@ stages:
       - api/ml/feature_columns.joblib
   
   evaluate_model:
-    cmd: python3 api/ml/evaluate.py
+    cmd: python3 api/ml/evaluate_model_light.py
     deps:
-      - api/ml/evaluate.py
+      - api/ml/evaluate_model_light.py
       - api/ml/credit_risk_model.joblib
       - api/ml/data/processed/borrowers_processed.csv
     outs:
