@@ -16,3 +16,19 @@ stages:
     outs:
       - api/ml/credit_risk_model.joblib
       - api/ml/feature_columns.joblib
+  
+  evaluate_model:
+    cmd: python3 api/ml/evaluate.py
+    deps:
+      - api/ml/evaluate.py
+      - api/ml/credit_risk_model.joblib
+      - api/ml/data/processed/borrowers_processed.csv
+    outs:
+      - evaluation_metrics.json
+
+  register_model:
+    cmd: python3 api/register_model.py
+    deps:
+      - api/register_model.py
+      - api/ml/credit_risk_model.joblib
+      - api/ml/feature_columns.joblib

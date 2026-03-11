@@ -8,9 +8,62 @@ pipeline {
     ECS_CLUSTER  = "aiops-fintech-cluster"
     ECS_SERVICE  = "aiops-fintech-service"
     IMAGE_TAG    = "${BUILD_NUMBER}"
+    TRAIN_MODEL  = "false"
   }
 
   stages {
+
+    stage('Detect Data or ML Code Changes') {
+      steps {
+        script {
+
+          def changes = sh(
+            script: "git diff --name-only HEAD~1 HEAD",
+            returnStdout: true
+          ).trim()
+
+          echo "Changed files:"
+          echo changes
+
+          if (changes.contains("borrowers_raw.csv.dvc") ||
+              changes.contains("api/ml/train.py") ||
+              changes.contains("api/ml/feature_engineering.py")) {
+
+              env.TRAIN_MODEL = "true"
+              echo "ML changes detected → model will retrain"
+
+          } else {
+
+              env.TRAIN_MODEL = "false"
+              echo "No ML/data changes → skipping retraining"
+          }
+        }
+      }
+    }
+
+    stage('Pull DVC Data') {
+      when {
+        expression { env.TRAIN_MODEL == "true" }
+      }
+      steps {
+        sh '''
+          echo "Pulling latest dataset from DVC remote..."
+          dvc pull
+        '''
+      }
+    }
+
+    stage('Train Model (DVC Pipeline)') {
+      when {
+        expression { env.TRAIN_MODEL == "true" }
+      }
+      steps {
+        sh '''
+          echo "Running ML pipeline..."
+          dvc repro
+        '''
+      }
+    }
 
     stage('Build Docker Image') {
       steps {
