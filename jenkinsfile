@@ -1,3 +1,4 @@
+def TRAIN_MODEL = false
 pipeline {
   agent any
 
@@ -8,7 +9,6 @@ pipeline {
     ECS_CLUSTER  = "aiops-fintech-cluster"
     ECS_SERVICE  = "aiops-fintech-service"
     IMAGE_TAG    = "${BUILD_NUMBER}"
-    TRAIN_MODEL  = "false"
   }
 
   stages {
@@ -32,12 +32,12 @@ pipeline {
               changes.contains("dvc.lock") ||
               changes.contains("jenkinsfile")) {
 
-              env.TRAIN_MODEL = "true"
+              TRAIN_MODEL = "true"
               echo "ML changes detected → model will retrain"
 
           } else {
 
-              env.TRAIN_MODEL = "false"
+              TRAIN_MODEL = "false"
               echo "No ML/data changes → skipping retraining"
           }
         }
@@ -46,7 +46,7 @@ pipeline {
 
     stage('Pull DVC Data') {
       when {
-        expression { env.TRAIN_MODEL == "true" }
+        expression { TRAIN_MODEL == "true" }
       }
       steps {
         sh '''
@@ -58,7 +58,7 @@ pipeline {
 
     stage('Train Model (DVC Pipeline)') {
       when {
-        expression { env.TRAIN_MODEL == "true" }
+        expression { TRAIN_MODEL == "true" }
       }
       steps {
         sh '''
