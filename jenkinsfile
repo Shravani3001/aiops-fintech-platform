@@ -4,6 +4,7 @@ pipeline {
 
   environment {
     AWS_REGION    = "ap-south-1"
+    AWS_DEFAULT_REGION = "ap-south-1"
     AWS_ACCOUNT  = "927340403996"        
     ECR_REPO     = "aiops-fintech"
     ECS_CLUSTER  = "aiops-fintech-cluster"
@@ -41,6 +42,14 @@ pipeline {
               echo "No ML/data changes → skipping retraining"
           }
         }
+      }
+    }
+
+    stage('Verify AWS Access') {
+      steps {
+        sh '''
+          aws sts get-caller-identity
+        '''
       }
     }
 
