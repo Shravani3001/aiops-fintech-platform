@@ -26,8 +26,10 @@ pipeline {
           echo changes
 
           if (changes.contains("borrowers_raw.csv.dvc") ||
-              changes.contains("api/ml/train.py") ||
-              changes.contains("api/ml/feature_engineering.py")) {
+              changes.contains("api/ml/") ||
+              changes.contains("api/register_model.py") ||
+              changes.contains("dvc.yaml") ||
+              changes.contains("dvc.lock")) {
 
               env.TRAIN_MODEL = "true"
               echo "ML changes detected → model will retrain"
