@@ -336,7 +336,8 @@ def predict_by_borrower_id(request: BorrowerIdRequest):
     })
     df = df.fillna(0)
     df = df[feature_columns]
-    probability = float(model.predict_proba(df)[0][1])
+    prediction = model.predict(df)
+    probability = float(prediction[0])
 
     latency = time.time() - start_time
 
