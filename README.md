@@ -197,6 +197,8 @@ aiops-fintech-platform
 
 # Project Architecture
 
+<img width="1536" height="1024" alt="AI credit risk prediction architecture" src="https://github.com/user-attachments/assets/7ae41c40-692d-4095-989f-88fff9d7b977" />
+
 ---
 
 # Prerequisites
