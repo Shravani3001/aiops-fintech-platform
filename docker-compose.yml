@@ -87,6 +87,16 @@ services:
     networks:
       - aiops-fintech-network
 
+  incident-seeder:
+    build:
+      context: ./api
+    container_name: incident-seeder
+    command: python seed_incidents.py
+    environment:
+      - MONGO_URI=${MONGO_URI}
+    networks:
+      - aiops-fintech-network
+
 volumes:
   grafana-data:
 

@@ -15,6 +15,8 @@ mlruns/
 
 # DVC cache 
 .dvc/cache/
+.dvc/config.local
+.dvc/tmp/
 
 # Terraform 
 *.tfvars
@@ -57,3 +59,8 @@ dvc-storage-infra/terraform.tfstate
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
+
+api/ml/credit_risk_model.joblib
+api/ml/feature_columns.joblib
+
+api/ml/data/raw/borrowers_raw.csv
