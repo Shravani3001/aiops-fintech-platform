@@ -1534,4 +1534,14 @@ The following enhancements can further improve the platform:
 
 ---
 
+# Author
 
+**Shravani K**
+
+---
+
+## License
+
+© 2026 Shravani K. All Rights Reserved.
+
+This repository is provided for portfolio, demonstration, and educational viewing purposes only. Unauthorized copying, modification, redistribution, or representation of this work as your own is prohibited.
